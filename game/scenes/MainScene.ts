@@ -8,6 +8,7 @@ export default class MainScene extends Phaser.Scene {
   private gameOver: boolean = false
   private gameStarted: boolean = false
   private startText!: Phaser.GameObjects.Text
+  private gameOverText?: Phaser.GameObjects.Text  // 修改为可选类型
   private touchStartX: number = 0
   private touchStartY: number = 0
   private gameWidth: number = 0
@@ -169,13 +170,45 @@ export default class MainScene extends Phaser.Scene {
       
       if (Phaser.Geom.Intersects.RectangleToRectangle(boatBounds, obstacleBounds)) {
         this.gameOver = true
-        this.add.text(this.gameWidth / 2, this.gameHeight / 2, '游戏结束\n点击屏幕重新开始', {
+        this.gameOverText = this.add.text(this.gameWidth / 2, this.gameHeight / 2, '游戏结束\n点击屏幕重新开始', {
           fontSize: `${Math.floor(Math.min(this.gameWidth / 800, this.gameHeight / 600) * 24)}px`,
           color: '#fff',
           align: 'center'
         }).setOrigin(0.5)
+
+        // 添加点击事件处理程序
+        this.input.once('pointerdown', () => {
+          this.restartGame()
+        })
         break
       }
     }
+  }
+
+  private restartGame() {
+    this.gameOver = false
+    this.gameStarted = false
+    this.score = 0
+    this.scoreText.setText('得分: 0')
+    
+    // 清除所有障碍物
+    this.obstacles.forEach(obstacle => obstacle.destroy())
+    this.obstacles = []
+    
+    // 重置龙舟位置
+    this.boat.x = this.gameWidth / 2
+    this.boat.y = this.gameHeight / 2
+    
+    // 清除游戏结束文本
+    if (this.gameOverText) {
+      this.gameOverText.destroy()
+      this.gameOverText = undefined
+    }
+    
+    // 显示开始游戏文本
+    this.startText = this.add.text(this.gameWidth / 2, this.gameHeight / 2, '点击屏幕开始游戏', {
+      fontSize: `${Math.floor(Math.min(this.gameWidth / 800, this.gameHeight / 600) * 24)}px`,
+      color: '#fff'
+    }).setOrigin(0.5)
   }
 } 
