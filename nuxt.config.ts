@@ -25,7 +25,7 @@ export default defineNuxtConfig({
   // 添加 host 配置，允许局域网访问
   devServer: {
     host: '0.0.0.0',
-    port: 3001
+    port: 3000
   },
 
   // Tailwind CSS 配置
@@ -34,5 +34,26 @@ export default defineNuxtConfig({
     configPath: 'tailwind.config.js',
     exposeConfig: false,
     viewer: true,
+  },
+
+  // 静态资源配置
+  nitro: {
+    publicAssets: [
+      {
+        dir: 'public',
+        baseURL: '/'
+      }
+    ]
+  },
+
+  // Vite 配置
+  vite: {
+    optimizeDeps: {
+      include: ['phaser'],
+      exclude: ['@nuxtjs/tailwindcss']
+    },
+    ssr: {
+      noExternal: ['phaser']
+    }
   }
 })

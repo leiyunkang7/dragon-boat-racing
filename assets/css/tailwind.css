@@ -1,3 +1,9 @@
 @tailwind base;
 @tailwind components;
-@tailwind utilities; 
+@tailwind utilities;
+
+@layer components {
+  .boat-icon {
+    @apply w-full h-full rotate-90;
+  }
+} 
