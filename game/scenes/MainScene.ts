@@ -8,74 +8,68 @@ export default class MainScene extends Phaser.Scene {
   private gameOver: boolean = false
   private gameStarted: boolean = false
   private startText!: Phaser.GameObjects.Text
-  private gameOverText?: Phaser.GameObjects.Text  // 修改为可选类型
+  private gameOverText?: Phaser.GameObjects.Text
   private touchStartX: number = 0
   private touchStartY: number = 0
   private gameWidth: number = 0
   private gameHeight: number = 0
-  private lastObstacleX: number = 0  // 记录上一个障碍物的X坐标
+  private lastObstacleX: number = 0
   private moveSpeed: number = 0
+  private baseScale: number = 0
 
   constructor() {
     super({ key: 'MainScene' })
   }
 
   preload() {
-    // 加载游戏资源
     this.load.image('boat', '/boat.png')
     this.load.image('obstacle', '/obstacle.png')
     this.load.image('background', '/background.png')
   }
 
   create() {
-    // 获取游戏尺寸
+    this.initializeGameDimensions()
+    this.initializeGameObjects()
+    this.setupEventListeners()
+  }
+
+  private initializeGameDimensions() {
     this.gameWidth = this.scale.width
     this.gameHeight = this.scale.height
+    this.baseScale = Math.min(this.gameWidth / 800, this.gameHeight / 600)
+  }
 
-    // 计算缩放比例
-    const baseScale = Math.min(this.gameWidth / 800, this.gameHeight / 600)
-    const boatScale = baseScale * 0.4
-    const obstacleScale = baseScale * 0.25
-
+  private initializeGameObjects() {
     // 计算移动速度
     const screenDiagonal = Math.sqrt(this.gameWidth * this.gameWidth + this.gameHeight * this.gameHeight)
-    const baseSpeed = screenDiagonal * 0.02
-    this.moveSpeed = baseSpeed
+    this.moveSpeed = screenDiagonal * 0.02
 
     // 添加背景
     this.add.image(this.gameWidth / 2, this.gameHeight / 2, 'background')
       .setDisplaySize(this.gameWidth, this.gameHeight)
 
     // 添加龙舟
-    this.boat = this.add.sprite(this.gameWidth / 2, this.gameHeight / 2, 'boat')
-    this.boat.setScale(boatScale)
-
-    // 文字样式配置
-    const textStyle = {
-      fontSize: `${Math.floor(baseScale * 24)}px`,
-      color: '#fff',
-      fontFamily: 'Arial',
-      align: 'left',
-      resolution: 2,  // 提高文字渲染分辨率
-      padding: { x: 2, y: 2 }  // 添加内边距防止文字被裁剪
-    }
+    this.boat = this.add.sprite(
+      this.gameWidth / 2,
+      this.gameHeight * 0.7,
+      'boat'
+    ).setScale(this.baseScale * 0.4)
 
     // 添加分数文本
-    this.scoreText = this.add.text(16, 16, '得分: 0', textStyle)
-      .setOrigin(0, 0)  // 设置原点为左上角
-      .setScrollFactor(0)  // 固定位置
-      .setDepth(100)  // 确保文字在最上层
-      .setAlpha(1)  // 确保完全不透明
+    this.scoreText = this.createText(16, 16, '得分: 0', { align: 'left' })
+      .setOrigin(0, 0)
+      .setScrollFactor(0)
 
     // 添加开始游戏文本
-    this.startText = this.add.text(this.gameWidth / 2, this.gameHeight / 2, '点击屏幕开始游戏', {
-      ...textStyle,
-      align: 'center'
-    })
-      .setOrigin(0.5)
-      .setDepth(100)
-      .setAlpha(1)
+    this.startText = this.createText(
+      this.gameWidth / 2,
+      this.gameHeight / 2,
+      '点击屏幕开始游戏',
+      { align: 'center' }
+    ).setOrigin(0.5)
+  }
 
+  private setupEventListeners() {
     // 添加触摸事件
     this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
       if (!this.gameStarted) {
@@ -86,74 +80,97 @@ export default class MainScene extends Phaser.Scene {
     // 添加触摸移动事件
     this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
       if (!this.gameStarted || this.gameOver) return
-      
-      // 计算目标位置和当前位置的距离
-      const dx = pointer.x - this.boat.x
-      const dy = pointer.y - this.boat.y
-      const distance = Math.sqrt(dx * dx + dy * dy)
-      
-      // 如果距离大于移动速度，则按比例移动
-      if (distance > this.moveSpeed) {
-        const ratio = this.moveSpeed / distance
-        this.boat.x += dx * ratio
-        this.boat.y += dy * ratio
-      } else {
-        // 如果距离小于移动速度，直接移动到目标位置
-        this.boat.x = pointer.x
-        this.boat.y = pointer.y
-      }
-      
-      // 限制边界
-      const boatWidth = this.boat.displayWidth
-      const boatHeight = this.boat.displayHeight
-      this.boat.x = Phaser.Math.Clamp(this.boat.x, boatWidth/2, this.gameWidth - boatWidth/2)
-      this.boat.y = Phaser.Math.Clamp(this.boat.y, boatHeight/2, this.gameHeight - boatHeight/2)
+      this.handleBoatMovement(pointer)
     })
 
     // 添加键盘控制
     this.input.keyboard?.on('keydown', (event: KeyboardEvent) => {
       if (!this.gameStarted || this.gameOver) return
-
-      switch (event.key) {
-        case 'ArrowLeft':
-          this.boat.x = Math.max(this.boat.displayWidth/2, this.boat.x - this.moveSpeed)
-          break
-        case 'ArrowRight':
-          this.boat.x = Math.min(this.gameWidth - this.boat.displayWidth/2, this.boat.x + this.moveSpeed)
-          break
-        case 'ArrowUp':
-          this.boat.y = Math.max(this.boat.displayHeight/2, this.boat.y - this.moveSpeed)
-          break
-        case 'ArrowDown':
-          this.boat.y = Math.min(this.gameHeight - this.boat.displayHeight/2, this.boat.y + this.moveSpeed)
-          break
-      }
+      this.handleKeyboardInput(event)
     })
+  }
+
+  private handleBoatMovement(pointer: Phaser.Input.Pointer) {
+    const dx = pointer.x - this.boat.x
+    const dy = pointer.y - this.boat.y
+    const distance = Math.sqrt(dx * dx + dy * dy)
+    
+    if (distance > this.moveSpeed) {
+      const ratio = this.moveSpeed / distance
+      this.boat.x += dx * ratio
+      this.boat.y += dy * ratio
+    } else {
+      this.boat.x = pointer.x
+      this.boat.y = pointer.y
+    }
+    
+    this.clampBoatPosition()
+  }
+
+  private handleKeyboardInput(event: KeyboardEvent) {
+    switch (event.key) {
+      case 'ArrowLeft':
+        this.boat.x = Math.max(this.boat.displayWidth/2, this.boat.x - this.moveSpeed)
+        break
+      case 'ArrowRight':
+        this.boat.x = Math.min(this.gameWidth - this.boat.displayWidth/2, this.boat.x + this.moveSpeed)
+        break
+      case 'ArrowUp':
+        this.boat.y = Math.max(this.boat.displayHeight/2, this.boat.y - this.moveSpeed)
+        break
+      case 'ArrowDown':
+        this.boat.y = Math.min(this.gameHeight - this.boat.displayHeight/2, this.boat.y + this.moveSpeed)
+        break
+    }
+    this.clampBoatPosition()
+  }
+
+  private clampBoatPosition() {
+    const boatWidth = this.boat.displayWidth
+    const boatHeight = this.boat.displayHeight
+    this.boat.x = Phaser.Math.Clamp(this.boat.x, boatWidth/2, this.gameWidth - boatWidth/2)
+    this.boat.y = Phaser.Math.Clamp(this.boat.y, boatHeight/2, this.gameHeight - boatHeight/2)
+  }
+
+  private createText(x: number, y: number, text: string, style: Partial<Phaser.Types.GameObjects.Text.TextStyle> = {}) {
+    return this.add.text(x, y, text, {
+      fontSize: `${Math.floor(this.baseScale * 24)}px`,
+      color: '#fff',
+      fontFamily: 'Arial',
+      resolution: 2,
+      padding: { x: 2, y: 2 },
+      ...style
+    })
+      .setDepth(100)
+      .setAlpha(1)
   }
 
   override update() {
     if (!this.gameStarted || this.gameOver) return
 
-    // 更新分数
+    this.updateScore()
+    this.updateObstacles()
+    this.checkCollisions()
+    this.spawnObstacles()
+  }
+
+  private updateScore() {
     this.score++
     this.scoreText.setText('得分: ' + this.score)
+  }
 
-    // 移动障碍物
+  private updateObstacles() {
     this.obstacles.forEach((obstacle, index) => {
-      // 向下移动
       obstacle.y += 2 + Math.floor(this.score / 200)
       
-      // 如果障碍物移出屏幕底部，则销毁
       if (obstacle.y > this.gameHeight + 50) {
         obstacle.destroy()
         this.obstacles.splice(index, 1)
       }
     })
+  }
 
-    // 检查碰撞
-    this.checkCollisions()
-
-    // 根据分数增加障碍物生成频率
+  private spawnObstacles() {
     if (Math.random() < 0.01 + Math.floor(this.score / 300) * 0.003) {
       this.spawnObstacle()
     }
@@ -162,26 +179,19 @@ export default class MainScene extends Phaser.Scene {
   private startGame() {
     this.gameStarted = true
     this.startText.destroy()
-    this.score = 0
-    this.obstacles.forEach(obstacle => obstacle.destroy())
-    this.obstacles = []
-    this.lastObstacleX = 0  // 重置上一个障碍物的X坐标
+    this.resetGameState()
   }
 
   private spawnObstacle() {
-    const baseScale = Math.min(this.gameWidth / 800, this.gameHeight / 600)
-    const obstacleScale = baseScale * 0.25
-
-    // 从左到右依次生成障碍物
-    const sectionWidth = this.gameWidth / 8  // 将屏幕宽度分成8个区域
+    const sectionWidth = this.gameWidth / 8
     this.lastObstacleX = (this.lastObstacleX + sectionWidth) % this.gameWidth
     
     const obstacle = this.add.sprite(
       this.lastObstacleX,
-      -50,  // 从屏幕上方生成
+      -50,
       'obstacle'
-    )
-    obstacle.setScale(obstacleScale)
+    ).setScale(this.baseScale * 0.25)
+    
     this.obstacles.push(obstacle)
   }
 
@@ -195,53 +205,54 @@ export default class MainScene extends Phaser.Scene {
       const distance = Math.sqrt(dx * dx + dy * dy)
       
       if (distance < boatRadius + obstacleRadius) {
-        this.gameOver = true
-        this.gameOverText = this.add.text(this.gameWidth / 2, this.gameHeight / 2, '游戏结束\n点击屏幕重新开始', {
-          fontSize: `${Math.floor(Math.min(this.gameWidth / 800, this.gameHeight / 600) * 24)}px`,
-          color: '#fff',
-          align: 'center',
-          resolution: 2,
-          padding: { x: 2, y: 2 }
-        })
-          .setOrigin(0.5)
-          .setDepth(100)
-          .setAlpha(1)
-
-        this.input.once('pointerdown', () => {
-          this.restartGame()
-        })
+        this.handleGameOver()
         break
       }
     }
   }
 
+  private handleGameOver() {
+    this.gameOver = true
+    this.gameOverText = this.createText(
+      this.gameWidth / 2,
+      this.gameHeight / 2,
+      '游戏结束\n点击屏幕重新开始',
+      { align: 'center' }
+    ).setOrigin(0.5)
+
+    this.input.once('pointerdown', () => {
+      this.restartGame()
+    })
+  }
+
   private restartGame() {
     this.gameOver = false
     this.gameStarted = false
+    this.resetGameState()
+    this.resetUI()
+  }
+
+  private resetGameState() {
     this.score = 0
-    this.scoreText.setText('得分: 0')
-    
     this.obstacles.forEach(obstacle => obstacle.destroy())
     this.obstacles = []
-    
+    this.lastObstacleX = 0
     this.boat.x = this.gameWidth / 2
-    this.boat.y = this.gameHeight / 2
-    
+    this.boat.y = this.gameHeight * 0.7
+  }
+
+  private resetUI() {
     if (this.gameOverText) {
       this.gameOverText.destroy()
       this.gameOverText = undefined
     }
     
-    const baseScale = Math.min(this.gameWidth / 800, this.gameHeight / 600)
-    this.startText = this.add.text(this.gameWidth / 2, this.gameHeight / 2, '点击屏幕开始游戏', {
-      fontSize: `${Math.floor(baseScale * 24)}px`,
-      color: '#fff',
-      align: 'center',
-      resolution: 2,
-      padding: { x: 2, y: 2 }
-    })
-      .setOrigin(0.5)
-      .setDepth(100)
-      .setAlpha(1)
+    this.scoreText.setText('得分: 0')
+    this.startText = this.createText(
+      this.gameWidth / 2,
+      this.gameHeight / 2,
+      '点击屏幕开始游戏',
+      { align: 'center' }
+    ).setOrigin(0.5)
   }
 } 
