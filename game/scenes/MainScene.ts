@@ -163,12 +163,18 @@ export default class MainScene extends Phaser.Scene {
   }
 
   private checkCollisions() {
-    const boatBounds = this.boat.getBounds()
-    
     for (const obstacle of this.obstacles) {
-      const obstacleBounds = obstacle.getBounds()
+      // 使用圆形碰撞检测
+      const boatRadius = this.boat.displayWidth * 0.4
+      const obstacleRadius = obstacle.displayWidth * 0.4
       
-      if (Phaser.Geom.Intersects.RectangleToRectangle(boatBounds, obstacleBounds)) {
+      // 计算两个圆心的距离
+      const dx = this.boat.x - obstacle.x
+      const dy = this.boat.y - obstacle.y
+      const distance = Math.sqrt(dx * dx + dy * dy)
+      
+      // 如果距离小于两个半径之和，则发生碰撞
+      if (distance < boatRadius + obstacleRadius) {
         this.gameOver = true
         this.gameOverText = this.add.text(this.gameWidth / 2, this.gameHeight / 2, '游戏结束\n点击屏幕重新开始', {
           fontSize: `${Math.floor(Math.min(this.gameWidth / 800, this.gameHeight / 600) * 24)}px`,
