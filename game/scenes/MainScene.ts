@@ -67,7 +67,7 @@ export default class MainScene extends Phaser.Scene {
     this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
       if (!this.gameStarted || this.gameOver) return
       
-      const speed = baseScale * 2
+      const speed = baseScale * 8
       const targetX = pointer.x
       const targetY = pointer.y
       
@@ -90,7 +90,7 @@ export default class MainScene extends Phaser.Scene {
     this.input.keyboard?.on('keydown', (event: KeyboardEvent) => {
       if (!this.gameStarted || this.gameOver) return
 
-      const speed = baseScale * 2
+      const speed = baseScale * 8
       switch (event.key) {
         case 'ArrowLeft':
           this.boat.x = Math.max(this.boat.displayWidth/2, this.boat.x - speed)
@@ -164,9 +164,9 @@ export default class MainScene extends Phaser.Scene {
 
   private checkCollisions() {
     for (const obstacle of this.obstacles) {
-      // 使用圆形碰撞检测
-      const boatRadius = this.boat.displayWidth * 0.4
-      const obstacleRadius = obstacle.displayWidth * 0.4
+      // 使用圆形碰撞检测，减小碰撞半径
+      const boatRadius = this.boat.displayWidth * 0.25  // 从0.4减小到0.25
+      const obstacleRadius = obstacle.displayWidth * 0.3  // 从0.4减小到0.3
       
       // 计算两个圆心的距离
       const dx = this.boat.x - obstacle.x
