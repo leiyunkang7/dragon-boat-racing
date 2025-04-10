@@ -58,8 +58,8 @@ export default class MainScene extends Phaser.Scene {
     ).setScale(this.baseScale * 0.4)
 
     // 添加分数文本
-    this.scoreText = this.createText(16, 16, '得分: 0', { align: 'left' })
-      .setOrigin(0, 0)
+    this.scoreText = this.createText(this.gameWidth - 16, 16, '得分: 0', { align: 'right' })
+      .setOrigin(1, 0)
       .setScrollFactor(0)
 
     // 添加开始游戏文本
