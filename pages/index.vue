@@ -1,71 +1,69 @@
 <template>
-  <div class="container">
-    <h1 class="title">端午节活动</h1>
-    <div class="menu">
-      <NuxtLink to="/quiz" class="menu-item">
-        <div class="menu-content">
-          <h2>答题领券</h2>
-          <p>参与答题赢取端午节礼品券</p>
-        </div>
-      </NuxtLink>
-      <NuxtLink to="/game" class="menu-item">
-        <div class="menu-content">
-          <h2>划龙舟</h2>
-          <p>来一场刺激的龙舟竞速</p>
-        </div>
-      </NuxtLink>
+  <div class="relative w-full h-screen overflow-hidden">
+    <!-- 背景图片 -->
+    <img 
+      src="/home-background.png" 
+      alt="背景" 
+      class="absolute inset-0 w-full h-full object-cover"
+    />
+    
+    <!-- 内容区域 -->
+    <div class="relative z-10 w-full h-full flex flex-col items-center">
+      <!-- 按钮区域 -->
+      <div class="absolute bottom-32 flex flex-col items-center space-y-6 w-full max-w-xs px-4">
+        <!-- 趣味答题按钮 -->
+        <NuxtLink to="/quiz" class="w-full relative">
+          <img 
+            src="/button-1.png" 
+            alt="趣味答题" 
+            class="w-full h-auto cursor-pointer transition-transform hover:scale-105"
+          />
+          <div class="absolute inset-0 flex items-center justify-center">
+            <span class="text-2xl font-bold text-white drop-shadow-lg">趣味答题</span>
+          </div>
+        </NuxtLink>
+
+        <!-- 划龙舟按钮 -->
+        <NuxtLink to="/game" class="w-full relative">
+          <img 
+            src="/button-2.png" 
+            alt="划龙舟" 
+            class="w-full h-auto cursor-pointer transition-transform hover:scale-105"
+          />
+          <div class="absolute inset-0 flex items-center justify-center">
+            <span class="text-2xl font-bold text-white drop-shadow-lg">划龙舟小游戏</span>
+          </div>
+        </NuxtLink>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-// 页面逻辑
+// 页面元数据
+useHead({
+  title: '端午龙舟赛',
+  meta: [
+    { name: 'description', content: '欢迎来到端午龙舟赛游戏' }
+  ]
+})
 </script>
 
 <style scoped>
-.container {
-  padding: 20px;
-  max-width: 600px;
-  margin: 0 auto;
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
-.title {
-  text-align: center;
-  color: #d4380d;
-  margin-bottom: 40px;
+.animate-float {
+  animation: float 3s ease-in-out infinite;
 }
 
-.menu {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.menu-item {
-  background: #fff;
-  border-radius: 12px;
-  padding: 20px;
-  text-decoration: none;
-  color: inherit;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s;
-}
-
-.menu-item:hover {
-  transform: translateY(-2px);
-}
-
-.menu-content {
-  text-align: center;
-}
-
-.menu-content h2 {
-  color: #d4380d;
-  margin-bottom: 8px;
-}
-
-.menu-content p {
-  color: #666;
-  margin: 0;
+.text-orange-600 {
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
 }
 </style> 

@@ -23,7 +23,8 @@ export default class MainScene extends Phaser.Scene {
 
   preload() {
     this.load.image('boat', '/boat.png')
-    this.load.image('obstacle', '/obstacle.png')
+    this.load.image('zongzi1', '/zongzi-1.png')
+    this.load.image('zongzi2', '/zongzi-2.png')
     this.load.image('background', '/game-background.png')
   }
 
@@ -55,7 +56,7 @@ export default class MainScene extends Phaser.Scene {
       this.gameWidth / 2,
       this.gameHeight * 0.7,
       'boat'
-    ).setScale(this.baseScale * 0.4)
+    ).setScale(this.baseScale * 0.3)
 
     // 添加分数文本
     this.scoreText = this.createText(this.gameWidth - 16, 16, '得分: 0', { align: 'right' })
@@ -188,11 +189,14 @@ export default class MainScene extends Phaser.Scene {
     const sectionWidth = this.gameWidth / 8
     this.lastObstacleX = (this.lastObstacleX + sectionWidth) % this.gameWidth
     
+    // 随机选择粽子图片
+    const zongziKey = Math.random() < 0.5 ? 'zongzi1' : 'zongzi2'
+    
     const obstacle = this.add.sprite(
       this.lastObstacleX,
       -50,
-      'obstacle'
-    ).setScale(this.baseScale * 0.25)
+      zongziKey
+    ).setScale(this.baseScale * 0.15)
     
     this.obstacles.push(obstacle)
   }
