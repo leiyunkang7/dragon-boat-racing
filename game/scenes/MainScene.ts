@@ -24,6 +24,7 @@ export default class MainScene extends Phaser.Scene {
   preload() {
     this.load.image('boat', '/boat.png')
     this.load.image('obstacle', '/obstacle.png')
+    this.load.image('background', '/game-background.png')
   }
 
   create() {
@@ -43,28 +44,11 @@ export default class MainScene extends Phaser.Scene {
     const screenDiagonal = Math.sqrt(this.gameWidth * this.gameWidth + this.gameHeight * this.gameHeight)
     this.moveSpeed = screenDiagonal * 0.02
 
-    // 创建渐变背景
-    const gradient = this.add.graphics()
-    const steps = 100  // 增加渐变步数，使过渡更平滑
-    const stepHeight = this.gameHeight / steps
-    
-    // 创建从浅蓝色到深蓝色的渐变
-    for (let i = 0; i < steps; i++) {
-      const progress = i / steps
-      // 使用三次方插值使过渡更自然
-      const easedProgress = progress * progress * progress
-      const color = Phaser.Display.Color.Interpolate.ColorWithColor(
-        Phaser.Display.Color.ValueToColor(0xADD8E6),  // 更浅的蓝色
-        Phaser.Display.Color.ValueToColor(0x4169E1),  // 更深的蓝色
-        steps,
-        i
-      )
-      
-      gradient.fillStyle(color.color)
-      gradient.fillRect(0, i * stepHeight, this.gameWidth, stepHeight + 1)  // 添加1像素重叠防止出现缝隙
-    }
-    
-    gradient.setDepth(0)  // 确保背景在最底层
+    // 添加背景图片
+    const background = this.add.image(0, 0, 'background')
+      .setOrigin(0, 0)
+      .setDisplaySize(this.gameWidth, this.gameHeight)
+      .setDepth(0)
 
     // 添加龙舟
     this.boat = this.add.sprite(
