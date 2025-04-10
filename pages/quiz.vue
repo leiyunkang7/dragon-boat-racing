@@ -1,27 +1,31 @@
 <template>
-  <div class="quiz-container">
-    <div v-if="!showResult" class="quiz-content">
-      <div class="progress">
-        第 {{ currentQuestionIndex + 1 }}/{{ questions.length }} 题
-      </div>
-      <div class="question">
-        <h2>{{ currentQuestion.question }}</h2>
-        <div class="options">
-          <button
-            v-for="(option, index) in currentQuestion.options"
-            :key="index"
-            class="option-btn"
-            :class="{ selected: selectedAnswer === index }"
-            @click="selectAnswer(index)"
-          >
-            {{ option }}
-          </button>
+  <div class="flex min-h-screen items-center justify-center p-5 bg-cover bg-center" style="background-image: url('/question-background.png')">
+    <div v-if="!showResult" class="w-[90%] max-w-[550px] bg-white rounded-[18px] p-8 shadow-lg relative">
+      <div class="mb-5">
+        <div class="relative pb-5 after:content-[''] after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-[90%] after:border-b after:border-dashed after:border-gray-200">
+          <div class="flex items-start justify-between gap-3">
+            <h2 class="text-lg text-gray-800 font-normal leading-7 flex-1 max-h-[56px] overflow-hidden pr-4">{{ currentQuestion.question }}</h2>
+            <span class="text-sm text-gray-500 whitespace-nowrap mt-1.5">{{ currentQuestionIndex + 1 }}/{{ questions.length }}</span>
+          </div>
         </div>
       </div>
-      <div class="actions">
+
+      <div class="space-y-2.5 px-2.5">
+        <button
+          v-for="(option, index) in currentQuestion.options"
+          :key="index"
+          class="w-full px-5 py-3 text-left text-base text-gray-800 border border-gray-200 rounded-xl bg-[#f0fcf8]/30 transition-all hover:border-[#ff6b00] hover:bg-[#fff5f0]"
+          :class="{ 'border-[#ff6b00] bg-[#fff5f0] text-[#ff6b00]': selectedAnswer === index }"
+          @click="selectAnswer(index)"
+        >
+          {{ option }}
+        </button>
+      </div>
+
+      <div class="h-12 mt-4">
         <button
           v-if="selectedAnswer !== null"
-          class="submit-btn"
+          class="w-full h-12 bg-[#ff6b00] text-white rounded-xl text-lg hover:bg-[#ff8533]"
           @click="submitAnswer"
         >
           提交答案
@@ -29,19 +33,14 @@
       </div>
     </div>
     
-    <div v-else class="result-content">
-      <h2>答题完成！</h2>
-      <p>您答对了 {{ correctCount }} 题</p>
-      <div v-if="correctCount >= 8" class="coupon">
-        <h3>恭喜获得礼品券！</h3>
-        <div class="coupon-code">{{ couponCode }}</div>
-        <p class="coupon-tip">请截图保存此券码，凭码领取礼品</p>
-      </div>
-      <div v-else class="no-coupon">
-        <p>很遗憾，答对8题以上才能获得礼品券</p>
-        <p>继续加油哦！</p>
-      </div>
-      <button class="restart-btn" @click="restartQuiz">重新答题</button>
+    <div v-else class="w-[90%] max-w-[550px] bg-white rounded-[18px] p-10 shadow-lg text-center">
+      <h2 class="text-2xl text-gray-800 font-normal mb-5">恭喜闯关成功</h2>
+      <button 
+        class="px-10 py-4 bg-[#ff6b00] text-white rounded-xl text-lg transition-all hover:bg-[#ff8533]"
+        @click="restartQuiz"
+      >
+        重新答题
+      </button>
     </div>
   </div>
 </template>
@@ -103,39 +102,22 @@ const questions = [
   }
 ]
 
-// 礼品券码池
-const couponCodes = [
-  'DB2024001', 'DB2024002', 'DB2024003', 'DB2024004', 'DB2024005',
-  'DB2024006', 'DB2024007', 'DB2024008', 'DB2024009', 'DB2024010'
-]
-
 const currentQuestionIndex = ref(0)
 const selectedAnswer = ref<number | null>(null)
 const showResult = ref(false)
-const correctCount = ref(0)
-const couponCode = ref('')
 
 const currentQuestion = computed(() => questions[currentQuestionIndex.value])
 
-const selectAnswer = (index: number): void => {
+const selectAnswer = (index: number) => {
   selectedAnswer.value = index
 }
 
 const submitAnswer = () => {
-  if (selectedAnswer.value === currentQuestion.value.correct) {
-    correctCount.value++
-  }
-  
   if (currentQuestionIndex.value < questions.length - 1) {
     currentQuestionIndex.value++
     selectedAnswer.value = null
   } else {
     showResult.value = true
-    if (correctCount.value >= 8) {
-      // 随机选择一个未使用的券码
-      const randomIndex = Math.floor(Math.random() * couponCodes.length)
-      couponCode.value = couponCodes[randomIndex]
-    }
   }
 }
 
@@ -143,105 +125,5 @@ const restartQuiz = () => {
   currentQuestionIndex.value = 0
   selectedAnswer.value = null
   showResult.value = false
-  correctCount.value = 0
-  couponCode.value = ''
 }
-</script>
-
-<style scoped>
-.quiz-container {
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-.progress {
-  text-align: center;
-  color: #666;
-  margin-bottom: 20px;
-}
-
-.question {
-  background: #fff;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
-}
-
-.question h2 {
-  color: #333;
-  margin-bottom: 20px;
-}
-
-.options {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.option-btn {
-  padding: 12px;
-  border: 2px solid #ddd;
-  border-radius: 8px;
-  background: #fff;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.option-btn.selected {
-  border-color: #d4380d;
-  background: #fff1f0;
-}
-
-.submit-btn {
-  width: 100%;
-  padding: 12px;
-  background: #d4380d;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 16px;
-}
-
-.result-content {
-  text-align: center;
-  background: #fff;
-  border-radius: 12px;
-  padding: 30px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.coupon {
-  margin: 20px 0;
-  padding: 20px;
-  background: #fff1f0;
-  border-radius: 8px;
-}
-
-.coupon-code {
-  font-size: 24px;
-  font-weight: bold;
-  color: #d4380d;
-  margin: 15px 0;
-  padding: 10px;
-  background: #fff;
-  border-radius: 4px;
-}
-
-.coupon-tip {
-  color: #666;
-  font-size: 14px;
-}
-
-.restart-btn {
-  margin-top: 20px;
-  padding: 12px 24px;
-  background: #d4380d;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-}
-</style> 
+</script> 

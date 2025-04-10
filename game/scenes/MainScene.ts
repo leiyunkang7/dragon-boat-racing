@@ -222,7 +222,7 @@ export default class MainScene extends Phaser.Scene {
     this.gameOverText = this.createText(
       this.gameWidth / 2,
       this.gameHeight / 2,
-      '游戏结束\n点击屏幕重新开始',
+      '恭喜闯关成功\n点击屏幕重新开始',
       { align: 'center' }
     ).setOrigin(0.5)
 
