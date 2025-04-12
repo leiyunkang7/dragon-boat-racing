@@ -4,6 +4,7 @@ export default class MainScene extends Phaser.Scene {
   private boat!: Phaser.GameObjects.Sprite
   private obstacles: Phaser.GameObjects.Sprite[] = []
   private score: number = 0
+  private avoidedZongziCount: number = 0  // 记录成功躲避的粽子数量
   private scoreText!: Phaser.GameObjects.Text
   private gameOver: boolean = false
   private gameStarted: boolean = false
@@ -56,11 +57,20 @@ export default class MainScene extends Phaser.Scene {
       this.gameWidth / 2,
       this.gameHeight * 0.7,
       'boat'
-    ).setScale(this.baseScale * 0.3)
+    ).setScale(this.baseScale * 0.2)
 
     // 添加分数文本
-    this.scoreText = this.createText(this.gameWidth - 16, 16, '得分: 0', { align: 'right' })
+    this.scoreText = this.createText(this.gameWidth - 16, 16, '0/30', { align: 'right' })
       .setOrigin(1, 0)
+      .setScrollFactor(0)
+
+    // 添加提示文本
+    this.createText(
+      this.gameWidth / 2,
+      16,
+      '躲避30个粽子即可通关',
+      { align: 'center' }
+    ).setOrigin(0.5, 0)
       .setScrollFactor(0)
 
     // 添加开始游戏文本
@@ -138,10 +148,12 @@ export default class MainScene extends Phaser.Scene {
   private createText(x: number, y: number, text: string, style: Partial<Phaser.Types.GameObjects.Text.TextStyle> = {}) {
     return this.add.text(x, y, text, {
       fontSize: `${Math.floor(this.baseScale * 24)}px`,
-      color: '#fff',
+      color: '#000000',
       fontFamily: 'Arial',
       resolution: 2,
       padding: { x: 2, y: 2 },
+      stroke: '#ffffff',
+      strokeThickness: 3,
       ...style
     })
       .setDepth(100)
@@ -158,8 +170,7 @@ export default class MainScene extends Phaser.Scene {
   }
 
   private updateScore() {
-    this.score++
-    this.scoreText.setText('得分: ' + this.score)
+    this.scoreText.setText('' + this.avoidedZongziCount + '/30')
   }
 
   private updateObstacles() {
@@ -167,8 +178,15 @@ export default class MainScene extends Phaser.Scene {
       obstacle.y += 2 + Math.floor(this.score / 200)
       
       if (obstacle.y > this.gameHeight + 50) {
+        // 成功躲避一个粽子
+        this.avoidedZongziCount++
         obstacle.destroy()
         this.obstacles.splice(index, 1)
+        
+        // 检查是否成功躲避了30个粽子
+        if (this.avoidedZongziCount >= 30) {
+          this.handleGameOver()
+        }
       }
     })
   }
@@ -222,7 +240,9 @@ export default class MainScene extends Phaser.Scene {
     this.gameOverText = this.createText(
       this.gameWidth / 2,
       this.gameHeight / 2,
-      '恭喜闯关成功\n点击屏幕重新开始',
+      this.avoidedZongziCount >= 30 
+        ? '恭喜闯关成功！\n成功躲避了' + this.avoidedZongziCount + '个粽子\n点击屏幕重新开始'
+        : '游戏结束\n成功躲避了' + this.avoidedZongziCount + '个粽子\n点击屏幕重新开始',
       { align: 'center' }
     ).setOrigin(0.5)
 
@@ -240,6 +260,7 @@ export default class MainScene extends Phaser.Scene {
 
   private resetGameState() {
     this.score = 0
+    this.avoidedZongziCount = 0  // 重置成功躲避的粽子计数
     this.obstacles.forEach(obstacle => obstacle.destroy())
     this.obstacles = []
     this.lastObstacleX = 0
@@ -253,7 +274,7 @@ export default class MainScene extends Phaser.Scene {
       this.gameOverText = undefined
     }
     
-    this.scoreText.setText('得分: 0')
+    this.scoreText.setText('0/30')
     this.startText = this.createText(
       this.gameWidth / 2,
       this.gameHeight / 2,
