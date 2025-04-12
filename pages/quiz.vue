@@ -17,7 +17,7 @@
         <button
           v-for="(option, index) in currentQuestion.options"
           :key="index"
-          class="w-full px-5 py-3 text-left text-base text-gray-800 border border-gray-200 rounded-xl bg-[#f0fcf8]/30 transition-all hover:border-[#ff6b00] hover:bg-[#fff5f0]"
+          class="w-full px-5 py-3 text-left text-base text-gray-800 border border-gray-200 rounded-xl bg-[#DCF4F3]/30 transition-all hover:border-[#ff6b00] hover:bg-[#fff5f0]"
           :class="{
             'border-[#ff6b00] bg-[#fff5f0] text-[#ff6b00]': isAnswerSelected(index),
             'cursor-pointer': true
