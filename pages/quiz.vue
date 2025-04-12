@@ -1,10 +1,10 @@
 <template>
-  <div class="flex min-h-screen items-center justify-center p-5 bg-cover bg-center" style="background-image: url('/question-background.png')">
+  <div class="flex min-h-screen items-center justify-center p-5 bg-cover bg-center font-sans" style="background-image: url('/question-background.png')">
     <div v-if="!showResult" class="w-[90%] max-w-[550px]">
       <!-- 问题卡片 -->
       <div class="bg-white rounded-[12px] p-5 shadow-[-8px_8px_16px_rgba(0,0,0,0.15)]">
         <div class="flex items-start justify-between gap-3">
-          <h2 class="text-lg text-gray-800 font-normal leading-6 flex-1 max-h-[48px] overflow-hidden pr-4">{{ currentQuestion.question }}</h2>
+          <h2 class="text-lg text-gray-800  leading-6 flex-1 max-h-[48px] overflow-hidden pr-4 font-medium">{{ currentQuestion.question }}</h2>
           <div class="flex items-center gap-2">
             <span class="text-sm text-gray-500 whitespace-nowrap mt-1.5">{{ currentQuestionIndex + 1 }}/{{ questions.length }}</span>
           </div>
@@ -12,7 +12,7 @@
       </div>
 
       <!-- 选项卡片 -->
-      <div class="bg-white rounded-[12px] p-5 shadow-[-8px_8px_16px_rgba(0,0,0,0.15)] relative -mt-1">
+      <div class="bg-white rounded-[12px] px-5 py-7 shadow-[-8px_8px_16px_rgba(0,0,0,0.15)] relative -mt-1">
         <div class="absolute top-0 left-0 w-full">
           <div class="w-[80%] mx-auto border-b border-dashed border-gray-200"></div>
         </div>
@@ -21,7 +21,7 @@
           <button
             v-for="(option, index) in currentQuestion.options"
             :key="index"
-            class="w-full px-4 py-2 text-left text-base text-gray-800 border border-gray-200 rounded-xl bg-[#DCF4F3]/30"
+            class="w-full px-4 py-2 text-left text-base text-gray-800 border border-gray-200 rounded-xl bg-[#DCF4F3]/30 font-normal"
             :class="{
               'border-[#ff6b00] bg-[#fff5f0] text-[#ff6b00]': isAnswerSelected(index),
               'cursor-pointer': true
@@ -47,7 +47,7 @@
         <div class="h-12 mt-4">
           <button
             v-if="selectedAnswer !== null"
-            class="w-[calc(100%+16px)] -ml-2 h-12 bg-[#ff6b00] text-white rounded-xl text-base"
+            class="w-[calc(100%+16px)] -ml-2 h-12 bg-[#ff6b00] text-white rounded-xl text-base font-medium"
             @click="submitAnswer"
           >
             提交答案
@@ -57,9 +57,9 @@
     </div>
     
     <div v-else class="w-[90%] max-w-[550px] bg-white rounded-[12px] p-10 shadow-[-8px_8px_16px_rgba(0,0,0,0.15)] text-center">
-      <h2 class="text-2xl text-gray-800 font-normal mb-5">恭喜闯关成功</h2>
+      <h2 class="text-2xl text-gray-800 font-medium mb-5">恭喜闯关成功</h2>
       <button 
-        class="px-10 py-4 bg-[#ff6b00] text-white rounded-xl text-lg"
+        class="px-10 py-4 bg-[#ff6b00] text-white rounded-xl text-lg font-medium"
         @click="restartQuiz"
       >
         重新答题

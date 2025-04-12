@@ -17,6 +17,15 @@ export default class MainScene extends Phaser.Scene {
   private lastObstacleX: number = 0
   private moveSpeed: number = 0
   private baseScale: number = 0
+  private lastObstacleY: number = 0  // 记录上一个障碍物的Y坐标
+  private readonly MIN_OBSTACLE_DISTANCE = 150  // 障碍物之间的最小距离
+  private readonly SCREEN_SECTIONS = 5  // 将屏幕分成5个区域
+  private lastSection: number = -1  // 记录上一个障碍物所在的区域
+  private readonly BASE_SPEED = 3  // 基础移动速度
+  private readonly MAX_SPEED = 6   // 最大移动速度
+  private readonly MIN_SPAWN_INTERVAL = 0.5  // 最小生成间隔（秒）
+  private readonly MAX_SPAWN_INTERVAL = 2.0  // 最大生成间隔（秒）
+  private lastSpawnTime: number = 0  // 上次生成时间
 
   constructor() {
     super({ key: 'MainScene' })
@@ -169,21 +178,21 @@ export default class MainScene extends Phaser.Scene {
     this.spawnObstacles()
   }
 
-  private updateScore() {
-    this.scoreText.setText('' + this.avoidedZongziCount + '/30')
-  }
-
   private updateObstacles() {
+    // 根据进度计算当前速度
+    const progress = this.avoidedZongziCount / 30
+    const currentSpeed = this.BASE_SPEED + 
+      (this.MAX_SPEED - this.BASE_SPEED) * progress
+
     this.obstacles.forEach((obstacle, index) => {
-      obstacle.y += 2 + Math.floor(this.score / 200)
+      obstacle.y += currentSpeed
       
       if (obstacle.y > this.gameHeight + 50) {
-        // 成功躲避一个粽子
         this.avoidedZongziCount++
+        this.updateScore()
         obstacle.destroy()
         this.obstacles.splice(index, 1)
         
-        // 检查是否成功躲避了30个粽子
         if (this.avoidedZongziCount >= 30) {
           this.handleGameOver()
         }
@@ -191,32 +200,61 @@ export default class MainScene extends Phaser.Scene {
     })
   }
 
+  private updateScore() {
+    this.scoreText.setText('' + this.avoidedZongziCount + '/30')
+  }
+
   private spawnObstacles() {
-    if (Math.random() < 0.01 + Math.floor(this.score / 300) * 0.003) {
+    const currentTime = this.time.now
+    const timeSinceLastSpawn = (currentTime - this.lastSpawnTime) / 1000  // 转换为秒
+    
+    // 根据已躲避的粽子数量计算当前难度
+    const progress = this.avoidedZongziCount / 30
+    const currentSpawnInterval = this.MAX_SPAWN_INTERVAL - 
+      (this.MAX_SPAWN_INTERVAL - this.MIN_SPAWN_INTERVAL) * progress
+    
+    if (timeSinceLastSpawn >= currentSpawnInterval) {
       this.spawnObstacle()
+      this.lastSpawnTime = currentTime
     }
+  }
+
+  private spawnObstacle() {
+    let targetSection = Math.floor(Math.random() * this.SCREEN_SECTIONS)
+    
+    if (targetSection === this.lastSection) {
+      targetSection = (targetSection + 1) % this.SCREEN_SECTIONS
+    }
+    this.lastSection = targetSection
+    
+    const sectionWidth = this.gameWidth / this.SCREEN_SECTIONS
+    const minX = targetSection * sectionWidth
+    const maxX = (targetSection + 1) * sectionWidth
+    
+    const x = minX + Math.random() * sectionWidth
+    const y = -50
+    
+    // 根据进度调整粽子大小
+    const progress = this.avoidedZongziCount / 30
+    const minScale = 0.12
+    const maxScale = 0.18
+    const currentScale = minScale + (maxScale - minScale) * progress
+    
+    const zongziKey = Math.random() < 0.5 ? 'zongzi1' : 'zongzi2'
+    
+    const obstacle = this.add.sprite(
+      x,
+      y,
+      zongziKey
+    ).setScale(this.baseScale * currentScale)
+    
+    this.obstacles.push(obstacle)
   }
 
   private startGame() {
     this.gameStarted = true
     this.startText.destroy()
     this.resetGameState()
-  }
-
-  private spawnObstacle() {
-    const sectionWidth = this.gameWidth / 8
-    this.lastObstacleX = (this.lastObstacleX + sectionWidth) % this.gameWidth
-    
-    // 随机选择粽子图片
-    const zongziKey = Math.random() < 0.5 ? 'zongzi1' : 'zongzi2'
-    
-    const obstacle = this.add.sprite(
-      this.lastObstacleX,
-      -50,
-      zongziKey
-    ).setScale(this.baseScale * 0.15)
-    
-    this.obstacles.push(obstacle)
   }
 
   private checkCollisions() {
@@ -237,17 +275,11 @@ export default class MainScene extends Phaser.Scene {
 
   private handleGameOver() {
     this.gameOver = true
-    this.gameOverText = this.createText(
-      this.gameWidth / 2,
-      this.gameHeight / 2,
-      this.avoidedZongziCount >= 30 
-        ? '恭喜闯关成功！\n成功躲避了' + this.avoidedZongziCount + '个粽子\n点击屏幕重新开始'
-        : '游戏结束\n成功躲避了' + this.avoidedZongziCount + '个粽子\n点击屏幕重新开始',
-      { align: 'center' }
-    ).setOrigin(0.5)
-
-    this.input.once('pointerdown', () => {
-      this.restartGame()
+    
+    // 发送游戏结束事件，包含是否通关和躲避的粽子数量
+    this.game.events.emit('gameOver', {
+      isSuccess: this.avoidedZongziCount >= 30,
+      score: this.avoidedZongziCount
     })
   }
 
@@ -260,20 +292,16 @@ export default class MainScene extends Phaser.Scene {
 
   private resetGameState() {
     this.score = 0
-    this.avoidedZongziCount = 0  // 重置成功躲避的粽子计数
+    this.avoidedZongziCount = 0
     this.obstacles.forEach(obstacle => obstacle.destroy())
     this.obstacles = []
     this.lastObstacleX = 0
+    this.lastSpawnTime = 0
     this.boat.x = this.gameWidth / 2
     this.boat.y = this.gameHeight * 0.7
   }
 
   private resetUI() {
-    if (this.gameOverText) {
-      this.gameOverText.destroy()
-      this.gameOverText = undefined
-    }
-    
     this.scoreText.setText('0/30')
     this.startText = this.createText(
       this.gameWidth / 2,
