@@ -1,57 +1,62 @@
 <template>
   <div class="flex min-h-screen items-center justify-center p-5 bg-cover bg-center" style="background-image: url('/question-background.png')">
-    <div v-if="!showResult" class="w-[90%] max-w-[550px] bg-white rounded-[18px] p-8 shadow-lg relative">
-      <div class="mb-5">
-        <div class="relative pb-5 after:content-[''] after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-[90%] after:border-b after:border-dashed after:border-gray-200">
-          <div class="flex items-start justify-between gap-3">
-            <h2 class="text-lg text-gray-800 font-normal leading-7 flex-1 max-h-[56px] overflow-hidden pr-4">{{ currentQuestion.question }}</h2>
-            <div class="flex items-center gap-2">
-              <span class="text-sm text-gray-500 whitespace-nowrap mt-1.5">{{ currentQuestionIndex + 1 }}/{{ questions.length }}</span>
-             
-            </div>
+    <div v-if="!showResult" class="w-[90%] max-w-[550px]">
+      <!-- 问题卡片 -->
+      <div class="bg-white rounded-[12px] p-5 shadow-[-8px_8px_16px_rgba(0,0,0,0.15)]">
+        <div class="flex items-start justify-between gap-3">
+          <h2 class="text-lg text-gray-800 font-normal leading-6 flex-1 max-h-[48px] overflow-hidden pr-4">{{ currentQuestion.question }}</h2>
+          <div class="flex items-center gap-2">
+            <span class="text-sm text-gray-500 whitespace-nowrap mt-1.5">{{ currentQuestionIndex + 1 }}/{{ questions.length }}</span>
           </div>
         </div>
       </div>
 
-      <div class="space-y-2.5 px-2.5">
-        <button
-          v-for="(option, index) in currentQuestion.options"
-          :key="index"
-          class="w-full px-5 py-3 text-left text-base text-gray-800 border border-gray-200 rounded-xl bg-[#DCF4F3]/30"
-          :class="{
-            'border-[#ff6b00] bg-[#fff5f0] text-[#ff6b00]': isAnswerSelected(index),
-            'cursor-pointer': true
-          }"
-          @click="selectAnswer(index)"
-        >
-          <div class="flex items-center">
-            <div class="w-5 h-5 mr-3 flex items-center justify-center">
-              <div v-if="isMultiChoice" class="w-4 h-4 border-2 rounded-sm" :class="isAnswerSelected(index) ? 'bg-[#ff6b00] border-[#ff6b00]' : 'border-gray-300'">
-                <svg v-if="isAnswerSelected(index)" class="w-3 h-3 text-white" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                </svg>
+      <!-- 选项卡片 -->
+      <div class="bg-white rounded-[12px] p-5 shadow-[-8px_8px_16px_rgba(0,0,0,0.15)] relative -mt-1">
+        <div class="absolute top-0 left-0 w-full">
+          <div class="w-[80%] mx-auto border-b border-dashed border-gray-200"></div>
+        </div>
+        
+        <div class="space-y-3">
+          <button
+            v-for="(option, index) in currentQuestion.options"
+            :key="index"
+            class="w-full px-4 py-2 text-left text-base text-gray-800 border border-gray-200 rounded-xl bg-[#DCF4F3]/30"
+            :class="{
+              'border-[#ff6b00] bg-[#fff5f0] text-[#ff6b00]': isAnswerSelected(index),
+              'cursor-pointer': true
+            }"
+            @click="selectAnswer(index)"
+          >
+            <div class="flex items-center">
+              <div class="w-5 h-5 mr-3 flex items-center justify-center">
+                <div v-if="isMultiChoice" class="w-4 h-4 border-2 rounded-sm" :class="isAnswerSelected(index) ? 'bg-[#ff6b00] border-[#ff6b00]' : 'border-gray-300'">
+                  <svg v-if="isAnswerSelected(index)" class="w-3 h-3 text-white" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                  </svg>
+                </div>
+                <div v-else class="w-4 h-4 border-2 rounded-full flex items-center justify-center" :class="isAnswerSelected(index) ? 'border-[#ff6b00]' : 'border-gray-300'">
+                  <div v-if="isAnswerSelected(index)" class="w-2 h-2 rounded-full bg-[#ff6b00]"></div>
+                </div>
               </div>
-              <div v-else class="w-4 h-4 border-2 rounded-full flex items-center justify-center" :class="isAnswerSelected(index) ? 'border-[#ff6b00]' : 'border-gray-300'">
-                <div v-if="isAnswerSelected(index)" class="w-2 h-2 rounded-full bg-[#ff6b00]"></div>
-              </div>
+              {{ option }}
             </div>
-            {{ option }}
-          </div>
-        </button>
-      </div>
+          </button>
+        </div>
 
-      <div class="h-12 mt-4">
-        <button
-          v-if="selectedAnswer !== null"
-          class="w-full h-12 bg-[#ff6b00] text-white rounded-xl text-lg"
-          @click="submitAnswer"
-        >
-          提交答案
-        </button>
+        <div class="h-12 mt-4">
+          <button
+            v-if="selectedAnswer !== null"
+            class="w-[calc(100%+16px)] -ml-2 h-12 bg-[#ff6b00] text-white rounded-xl text-base"
+            @click="submitAnswer"
+          >
+            提交答案
+          </button>
+        </div>
       </div>
     </div>
     
-    <div v-else class="w-[90%] max-w-[550px] bg-white rounded-[18px] p-10 shadow-lg text-center">
+    <div v-else class="w-[90%] max-w-[550px] bg-white rounded-[12px] p-10 shadow-[-8px_8px_16px_rgba(0,0,0,0.15)] text-center">
       <h2 class="text-2xl text-gray-800 font-normal mb-5">恭喜闯关成功</h2>
       <button 
         class="px-10 py-4 bg-[#ff6b00] text-white rounded-xl text-lg"
