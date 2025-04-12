@@ -42,10 +42,7 @@
 <script setup lang="ts">
 // 页面元数据
 useHead({
-  title: '端午龙舟赛',
-  meta: [
-    { name: 'description', content: '欢迎来到端午龙舟赛游戏' }
-  ]
+  title: '端午节活动',
 })
 </script>
 
