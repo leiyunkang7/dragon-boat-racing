@@ -17,7 +17,7 @@
         <button
           v-for="(option, index) in currentQuestion.options"
           :key="index"
-          class="w-full px-5 py-3 text-left text-base text-gray-800 border border-gray-200 rounded-xl bg-[#DCF4F3]/30 transition-all hover:border-[#ff6b00] hover:bg-[#fff5f0]"
+          class="w-full px-5 py-3 text-left text-base text-gray-800 border border-gray-200 rounded-xl bg-[#DCF4F3]/30"
           :class="{
             'border-[#ff6b00] bg-[#fff5f0] text-[#ff6b00]': isAnswerSelected(index),
             'cursor-pointer': true
@@ -43,7 +43,7 @@
       <div class="h-12 mt-4">
         <button
           v-if="selectedAnswer !== null"
-          class="w-full h-12 bg-[#ff6b00] text-white rounded-xl text-lg hover:bg-[#ff8533]"
+          class="w-full h-12 bg-[#ff6b00] text-white rounded-xl text-lg"
           @click="submitAnswer"
         >
           提交答案
@@ -54,7 +54,7 @@
     <div v-else class="w-[90%] max-w-[550px] bg-white rounded-[18px] p-10 shadow-lg text-center">
       <h2 class="text-2xl text-gray-800 font-normal mb-5">恭喜闯关成功</h2>
       <button 
-        class="px-10 py-4 bg-[#ff6b00] text-white rounded-xl text-lg transition-all hover:bg-[#ff8533]"
+        class="px-10 py-4 bg-[#ff6b00] text-white rounded-xl text-lg"
         @click="restartQuiz"
       >
         重新答题
