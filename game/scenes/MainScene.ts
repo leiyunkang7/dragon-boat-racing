@@ -3,21 +3,15 @@ import Phaser from 'phaser'
 export default class MainScene extends Phaser.Scene {
   private boat!: Phaser.GameObjects.Sprite
   private obstacles: Phaser.GameObjects.Sprite[] = []
-  private score: number = 0
   private avoidedZongziCount: number = 0  // 记录成功躲避的粽子数量
   private scoreText!: Phaser.GameObjects.Text
   private gameOver: boolean = false
   private gameStarted: boolean = false
   private startText!: Phaser.GameObjects.Text
-  private gameOverText?: Phaser.GameObjects.Text
-  private touchStartX: number = 0
-  private touchStartY: number = 0
   private gameWidth: number = 0
   private gameHeight: number = 0
-  private lastObstacleX: number = 0
   private moveSpeed: number = 0
   private baseScale: number = 0
-  private lastObstacleY: number = 0  // 记录上一个障碍物的Y坐标
   private readonly MIN_OBSTACLE_DISTANCE = 150  // 障碍物之间的最小距离
   private readonly SCREEN_SECTIONS = 5  // 将屏幕分成5个区域
   private lastSection: number = -1  // 记录上一个障碍物所在的区域
@@ -26,6 +20,9 @@ export default class MainScene extends Phaser.Scene {
   private readonly MIN_SPAWN_INTERVAL = 0.5  // 最小生成间隔（秒）
   private readonly MAX_SPAWN_INTERVAL = 2.0  // 最大生成间隔（秒）
   private lastSpawnTime: number = 0  // 上次生成时间
+  private backgroundMusic!: Phaser.Sound.BaseSound  // 背景音乐
+  private musicButton!: Phaser.GameObjects.Sprite  // 音乐控制按钮
+  private isMusicPlaying: boolean = true  // 音乐播放状态
 
   constructor() {
     super({ key: 'MainScene' })
@@ -36,6 +33,8 @@ export default class MainScene extends Phaser.Scene {
     this.load.image('zongzi1', '/zongzi-1.png')
     this.load.image('zongzi2', '/zongzi-2.png')
     this.load.image('background', '/game-background.png')
+    this.load.audio('bgm', '/bgm.mp3')  // 加载背景音乐
+    this.load.image('music', '/music.svg')  // 加载音乐图标
   }
 
   create() {
@@ -89,6 +88,23 @@ export default class MainScene extends Phaser.Scene {
       '点击屏幕开始游戏',
       { align: 'center' }
     ).setOrigin(0.5)
+
+    // 添加音乐控制按钮
+    this.musicButton = this.add.sprite(
+      60,  // 左边距离40像素
+      this.gameHeight - 40,  // 底部距离40像素
+      'music'
+    )
+      .setScale(this.baseScale * 0.15)
+      .setInteractive()
+      .setScrollFactor(0)
+      .setDepth(100)
+      .setTint(0xffffff)  // 初始为白色（正常状态）
+
+    // 添加音乐控制按钮的点击事件
+    this.musicButton.on('pointerdown', () => {
+      this.toggleMusic()
+    })
   }
 
   private setupEventListeners() {
@@ -255,6 +271,25 @@ export default class MainScene extends Phaser.Scene {
     this.gameStarted = true
     this.startText.destroy()
     this.resetGameState()
+    
+    // 播放背景音乐
+    if (!this.backgroundMusic) {
+      this.backgroundMusic = this.sound.add('bgm', {
+        loop: true,
+        volume: 0.5
+      })
+    }
+    this.backgroundMusic.play()
+    this.isMusicPlaying = true
+    this.musicButton.setTint(0xffffff)  // 正常颜色
+    // 添加旋转动画
+    this.tweens.add({
+      targets: this.musicButton,
+      angle: 360,
+      duration: 2000,
+      repeat: -1,
+      ease: 'Linear'
+    })
   }
 
   private checkCollisions() {
@@ -276,6 +311,11 @@ export default class MainScene extends Phaser.Scene {
   private handleGameOver() {
     this.gameOver = true
     
+    // 停止背景音乐
+    if (this.backgroundMusic) {
+      this.backgroundMusic.stop()
+    }
+    
     // 发送游戏结束事件，包含是否通关和躲避的粽子数量
     this.game.events.emit('gameOver', {
       isSuccess: this.avoidedZongziCount >= 30,
@@ -291,11 +331,9 @@ export default class MainScene extends Phaser.Scene {
   }
 
   private resetGameState() {
-    this.score = 0
     this.avoidedZongziCount = 0
     this.obstacles.forEach(obstacle => obstacle.destroy())
     this.obstacles = []
-    this.lastObstacleX = 0
     this.lastSpawnTime = 0
     this.boat.x = this.gameWidth / 2
     this.boat.y = this.gameHeight * 0.7
@@ -309,5 +347,27 @@ export default class MainScene extends Phaser.Scene {
       '点击屏幕开始游戏',
       { align: 'center' }
     ).setOrigin(0.5)
+  }
+
+  private toggleMusic() {
+    this.isMusicPlaying = !this.isMusicPlaying
+    if (this.isMusicPlaying) {
+      this.backgroundMusic.play()
+      this.musicButton.setTint(0xffffff)  // 正常颜色
+      // 添加旋转动画
+      this.tweens.add({
+        targets: this.musicButton,
+        angle: 360,
+        duration: 2000,
+        repeat: -1,
+        ease: 'Linear'
+      })
+    } else {
+      this.backgroundMusic.pause()
+      this.musicButton.setTint(0x888888)  // 灰色
+      // 停止旋转动画
+      this.tweens.killTweensOf(this.musicButton)
+      this.musicButton.angle = 0
+    }
   }
 } 
