@@ -72,30 +72,8 @@ onMounted(async () => {
 const restartGame = async () => {
   showGameOver.value = false
   if (game.value) {
-    game.value.destroy(true)
-    game.value = null
-  }
-  
-  try {
-    // 动态导入 Phaser
-    const Phaser = await import('phaser')
-    
-    // 添加主场景到游戏配置
-    config.scene = [MainScene]
-    
-    // 创建游戏实例
-    game.value = new Phaser.Game(config)
-    
-    // 监听游戏结束事件
-    game.value.events.on('gameOver', (data) => {
-      console.log('Game over event received:', data)
-      showGameOver.value = true
-      isSuccess.value = data.isSuccess
-      score.value = data.score
-    })
-  } catch (err) {
-    console.error('Failed to restart game:', err)
-    error.value = '游戏重启失败，请刷新页面重试'
+    // 直接重置游戏状态
+    game.value.scene.getScene('MainScene').events.emit('restart')
   }
 }
 

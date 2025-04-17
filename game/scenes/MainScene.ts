@@ -126,6 +126,11 @@ export default class MainScene extends Phaser.Scene {
       if (!this.gameStarted || this.gameOver) return
       this.handleKeyboardInput(event)
     })
+
+    // 添加重启事件监听
+    this.events.on('restart', () => {
+      this.restartGame()
+    })
   }
 
   private handleBoatMovement(pointer: Phaser.Input.Pointer) {
