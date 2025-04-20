@@ -15,6 +15,7 @@
     "@nuxt/icon": "1.11.0",
     "@nuxt/image": "1.10.0",
     "@nuxt/scripts": "0.11.2",
+    "@nuxthub/core": "0.8.24",
     "@unhead/vue": "^2.0.0-rc.8",
     "eslint": "^9.0.0",
     "nuxt": "^3.16.1",
