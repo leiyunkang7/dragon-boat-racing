@@ -1,0 +1,7 @@
+{
+  "name": "dragon-boat-racing",
+  "compatibility_date": "2025-04-20",
+  "assets": {
+    "directory": "./.output"
+  }
+}
