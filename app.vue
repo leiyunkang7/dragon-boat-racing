@@ -43,8 +43,8 @@ button {
 
 /* 安全区域变量 */
 :root {
-  /* 顶部安全距离128px，转换为rem单位 */
-  --safe-area-inset-top: max(env(safe-area-inset-top, 128px), 128px);
+  /* 顶部安全距离158px，转换为rem单位 */
+  --safe-area-inset-top: max(env(safe-area-inset-top, 158px), 158px);
   /* 底部安全距离98px，转换为rem单位 */
   --safe-area-inset-bottom: max(env(safe-area-inset-bottom, 98px), 98px);
   /* 内容区域高度1300px */
@@ -90,7 +90,7 @@ button {
 
 @supports not (env(safe-area-inset-top)) {
   :root {
-    --safe-area-inset-top: 128px;
+    --safe-area-inset-top: 158px;
     --safe-area-inset-bottom: 98px;
   }
 }
