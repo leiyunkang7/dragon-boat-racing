@@ -15,27 +15,23 @@
       <div class="content-container w-full flex flex-col items-center justify-end px-[32px]">
         <div class="w-full max-w-[686px] space-y-[40px] mb-[98px]">
           <!-- 趣味答题按钮 -->
-          <NuxtLink to="/quiz" class="w-full relative">
+          <NuxtLink to="/quiz" class="w-full relative flex items-center justify-center">
             <img 
               src="/button-1.png" 
               alt="趣味答题" 
               class="w-full h-auto cursor-pointer transition-transform hover:scale-105"
             />
-            <div class="absolute inset-0 flex items-center justify-center">
-              <span class="text-[48px] font-bold text-white drop-shadow-lg">趣味答题</span>
-            </div>
+            <span class="absolute text-[48px] font-bold text-white drop-shadow-lg">趣味答题</span>
           </NuxtLink>
 
           <!-- 划龙舟按钮 -->
-          <NuxtLink to="/game" class="w-full relative">
+          <NuxtLink to="/game" class="w-full relative flex items-center justify-center">
             <img 
               src="/button-2.png" 
               alt="划龙舟" 
               class="w-full h-auto cursor-pointer transition-transform hover:scale-105"
             />
-            <div class="absolute inset-0 flex items-center justify-center">
-              <span class="text-[48px] font-bold text-white drop-shadow-lg">划龙舟小游戏</span>
-            </div>
+            <span class="absolute text-[48px] font-bold text-white drop-shadow-lg">划龙舟小游戏</span>
           </NuxtLink>
         </div>
       </div>
